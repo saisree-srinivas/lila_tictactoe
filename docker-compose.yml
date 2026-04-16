@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  postgres:
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-nakama}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-localdb}
+    volumes:
+      - data:/var/lib/postgresql/data
+    expose:
+      - "8080"
+      - "5432"
+    ports:
+      - "5432:5432"
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "nakama"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  nakama:
+    image: heroiclabs/nakama:3.21.1
+    entrypoint:
+      - "/bin/sh"
+      - "-ecx"
+      - >
+          /nakama/nakama migrate up --database.address postgres:${POSTGRES_PASSWORD:-localdb}@postgres:5432/${POSTGRES_DB:-nakama} &&
+          exec /nakama/nakama --name nakama1 --database.address postgres:${POSTGRES_PASSWORD:-localdb}@postgres:5432/${POSTGRES_DB:-nakama} --logger.level DEBUG --session.token_expiry_sec 7200
+    restart: always
+    links:
+      - "postgres:db"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/nakama/data/modules
+    expose:
+      - "7349"
+      - "7350"
+      - "7351"
+    ports:
+      - "7349:7349"
+      - "7350:7350"
+      - "7351:7351"
+    healthcheck:
+      test: ["CMD", "/nakama/nakama", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  data:
