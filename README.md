@@ -1,5 +1,8 @@
 # Server-Authoritative Tic-Tac-Toe
 
+### [Click Here for Live Demo](https://lila-tictactoe-psi.vercel.app/)
+Note: The live link demonstrates the UI, Leaderboards, and Profile components. To test the real-time multiplayer functionality, please follow the Local Development Deployment instructions below to run the authoritative Go backend.
+
 A production-ready multiplayer Tic-Tac-Toe application. This project uses a **Server-Authoritative** architecture powered by a [Nakama](https://heroiclabs.com/nakama/) backend written in Go, and a real-time web frontend built with React, TypeScript, and Vite.
 
 ## Architecture Overview
